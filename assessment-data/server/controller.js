@@ -29,14 +29,8 @@ module.exports = {
             city_id SERIAL PRIMARY KEY,
             name VARCHAR,
             rating INTEGER,
-            foreign key (country_id) REFERENCES countries(country_id)
+            country_id INTEGER REFERENCES countries(country_id)
             );
-
-    
-            insert into cities (name, rating, country_id)
-            values ('shenyang',5,10),
-            ('dalian',5,10),
-            ('beijing',5,10);
                 
                 insert into countries (name)
                 values ('Afghanistan'),
@@ -234,6 +228,12 @@ module.exports = {
             ('Yemen'),
             ('Zambia'),
             ('Zimbabwe');
+
+            INSERT INTO cities (name, rating, country_id)
+            values ('shenyang',5,10),
+            ('dalian',5,10),
+            ('beijing',5,10);
+
         `).then(() => {
             console.log('DB seeded!')
             res.sendStatus(200)
@@ -248,14 +248,14 @@ module.exports = {
         let {name, rating, countryId} = req.body
 
         sequelize.query(
-                `INSERT INTO cities (city_id, name, rating, country_id)
-                VALUES ('${name}', ${rating}, ${countryId}`)
+                `INSERT INTO cities (name, rating, country_id)
+                VALUES ('${name}', ${rating}, ${countryId})`)
             .then(dbRes => res.status(200).send(dbRes[0]))
             .catch(err => console.log(err))
     },
     getCities: (req,res) =>{
         sequelize.query(`
-        SELECT i.city_id, i.name, i.rating, o.name FROM cities AS i
+        SELECT i.city_id, i.name AS city, i.rating, o.name AS country FROM cities AS i
         JOIN countries AS o
         ON i.country_id = o.country_id
         ORDER BY i.rating DESC
@@ -267,7 +267,7 @@ module.exports = {
         let {id} = req.params
 
         sequelize.query(`
-        DELECT FROM cities
+        DELETE FROM cities
         WHERE city_id = ${id}
         `)
         .then(dbRes => res.status(200).send(dbRes[0]))
